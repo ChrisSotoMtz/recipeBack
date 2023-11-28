@@ -15,6 +15,11 @@ const recipeSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    description: {
+        type: String,
+        required: true,
+
+    },
     ingredients:
     {
         type: String,
@@ -47,18 +52,23 @@ const recipeSchema = new mongoose.Schema({
 const Recipe = mongoose.model('Recipe', recipeSchema);
 
 router.post('/add', async (req, res) => {
-    const { title, ingredients, instructions,category,cookingTime, image,owner } = req.body;
-    console.log('el body es: ', title, ingredients, instructions,category,cookingTime, image);
-    const recipe = { title, ingredients,category,cookingTime, instructions, image,owner}
+    const { title, description ,ingredients, instructions, category, cookingTime, image, owner } = req.body;
+    const recipe = { title,description, ingredients, category, cookingTime, instructions, image, owner }
     console.log('la receta es: ', recipe);
     const newRecipe = new Recipe(recipe);
-    await newRecipe.save(); 
+    await newRecipe.save();
     res.json({ status: 'Recipe Saved' });
 });
 
 
 router.get('/all', async (req, res) => {
     const recipes = await Recipe.find();
+    console.log(recipes);
+    res.json(recipes);
+});
+
+router.get('/all/:owner', async (req, res) => {
+    const recipes = await Recipe.find({ owner: req.params.owner });
     console.log(recipes);
     res.json(recipes);
 });
