@@ -5,7 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const bodyParser = require('body-parser');
 var cors = require('cors');
-
+require('dotenv').config()
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var recipesRouter = require('./routes/recipes');
@@ -15,10 +15,9 @@ const uri = "mongodb+srv://admin:7CguCz2ZQVHM3HSf@cluster0.bhr49p2.mongodb.net/?
 mongoose.connect(uri);
 
 var app = express();
-app.use(bodyParser.json());
-
+app.use(bodyParser.json({limit: "50mb"}));
+app.use(bodyParser.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
 app.use(logger('dev'));
-app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));

@@ -18,9 +18,13 @@ const userschema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
+  },
+  role: {
+    type: String,
+    default: 'user',
+    enum: ["user", "admin"]
   }
 });
-const secretKey = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA53VzmIVVZZWyNm266l82mnoDc9g/snXklax5kChEhqK/WnTUvuXP4Gd4THj8rchxgUGKXd4PF3SUcKyn/qPmTet0idVHk2PwP//FOVgYo5Lb04js0pgZkbyB/WjuMp1w+yMuSn0NYAP7Q9U7DfTbjmox8OQt4tCB4m7UrJghGqT8jkPyZO/Ka6/XsyjTYPOUL3t3PD7JShVAgo1mAY6gSr4SORywIiuHsg+59ad7MXGy78LirhtqAcDECKF7VZpxMuEjMLg3o2yzNUeWI2MgIF+t0HbO1E387fvLcuSyai1yWbSr1PXyiB2aXyDpbD4u7d3ux4ahU2opH11lBqvx+wIDAQA'
 
 const user = mongoose.model('user', userschema);
 /* GET users listing. */
@@ -33,11 +37,10 @@ router.post('/login', async(req, res) => {
     return res.status(400).json({ error: 'Todos los campos son obligatorios.' });
   }
   const existingUser = await user.findOne({ email: username });
-  console.log('EL USUARIO ES: ', existingUser);
   var userdata = username;
   if (user && bcrypt.compareSync(password, existingUser.password)) {
     // create a token
-    const token = jwt.sign({ username }, secretKey, { expiresIn: '1h' });
+    const token = jwt.sign({ username }, process.env.JWTKEY, { expiresIn: '1h' });
 
     res.json({ token, userdata });
   } else {
@@ -46,11 +49,10 @@ router.post('/login', async(req, res) => {
 });
 router.post('/signup',async(req, res) => {
   // Recover data from body
-  const { username, email, password } = req.body;
+  const { username, email, password,role} = req.body;
   const hash = bcrypt.hashSync(password, salt);
 
-  const userdata = {name:username, email:email, password:hash}
-  console.log('el user es: ', user);
+  const userdata = {name:username, email:email, password:hash , role:role}
   // Verify that all fields are present
   if (!username || !email || !password) {
     return res.status(400).json({ error: 'Todos los campos son obligatorios.' });
@@ -63,11 +65,17 @@ router.post('/signup',async(req, res) => {
   // y realizar la lógica de hash y sal para la contraseña
   createUser(userdata)
   // Crear un token JWT
-  const token = jwt.sign({ username, email }, secretKey, { expiresIn: '1h' });
+  const token = jwt.sign({ username, email }, process.env.JWTKEY, { expiresIn: '1h' });
 
   // Enviar el token como respuesta
   res.json({ token, username, email});
 });
+
+router.get('/role/:id', async (req, res) => {
+  const { id } = req.params;
+  const existingUser = await user.findOne({ email: id });
+  res.json( existingUser?.role);
+}); 
 
 const createUser = async (userdata) => {
   const newUser = new user(userdata);
