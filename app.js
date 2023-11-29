@@ -15,13 +15,14 @@ const uri = "mongodb+srv://admin:7CguCz2ZQVHM3HSf@cluster0.bhr49p2.mongodb.net/?
 mongoose.connect(uri);
 
 var app = express();
+app.use(cors());
+
 app.use(bodyParser.json({limit: "50mb"}));
 app.use(bodyParser.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
 app.use(logger('dev'));
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors());
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);

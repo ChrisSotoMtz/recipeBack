@@ -87,7 +87,6 @@ router.get('/all/:owner', async (req, res) => {
 router.get('/one/:id', async (req, res) => {
     const recipe = await Recipe.findById(req.params.id);
     //console.log(recipe);
-    console.log('somos los one');
     res.json(recipe);
 });
 
@@ -97,7 +96,6 @@ router.delete('/delete/:id', async (req, res) => {
 });
 
 router.put('/update/:id', upload.single('image'), async (req, res) => {
-    console.log('somos los update', req.body);
     await Recipe.findByIdAndUpdate(req.params.id, req.body);
     res.json({ status: 'Recipe Updated' });
 });
